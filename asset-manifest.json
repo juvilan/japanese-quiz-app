@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/japanese-quiz-app/static/css/main.e0038327.css",
-    "main.js": "/japanese-quiz-app/static/js/main.37b612e0.js",
+    "main.js": "/japanese-quiz-app/static/js/main.6aa21aab.js",
     "index.html": "/japanese-quiz-app/index.html",
     "main.e0038327.css.map": "/japanese-quiz-app/static/css/main.e0038327.css.map",
-    "main.37b612e0.js.map": "/japanese-quiz-app/static/js/main.37b612e0.js.map"
+    "main.6aa21aab.js.map": "/japanese-quiz-app/static/js/main.6aa21aab.js.map"
   },
   "entrypoints": [
     "static/css/main.e0038327.css",
-    "static/js/main.37b612e0.js"
+    "static/js/main.6aa21aab.js"
   ]
 }
