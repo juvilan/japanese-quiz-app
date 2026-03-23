@@ -1,8 +1,10 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import './App.css';
+import AdminScreen from './AdminScreen';
 
-// Apps Script 배포 URL - GAS 배포 후 여기에 입력
-const GAS_URL = '';
+function getGasUrl() {
+  return localStorage.getItem('gasUrl') || '';
+}
 
 // ===== 가나 데이터 =====
 const KANA = {
@@ -94,8 +96,9 @@ function buildQuestions(type, level) {
 }
 
 function saveToSheet(data) {
-  if (!GAS_URL) return;
-  fetch(GAS_URL, {
+  const url = getGasUrl();
+  if (!url) return;
+  fetch(url, {
     method: 'POST',
     mode: 'no-cors',
     headers: { 'Content-Type': 'application/json' },
@@ -237,7 +240,7 @@ function QuizScreen({ questions, onFinish }) {
 
 function ResultScreen({ score, total, onRestart, onChangeLevel }) {
   const pct = Math.round(score / total * 100);
-  const saved = GAS_URL ? '✓ 결과가 저장되었습니다.' : '';
+  const saved = getGasUrl() ? '✓ 결과가 저장되었습니다.' : '';
 
   return (
     <div className="screen">
@@ -259,11 +262,20 @@ function ResultScreen({ score, total, onRestart, onChangeLevel }) {
 // ===== 메인 앱 =====
 
 export default function App() {
+  const [isAdmin, setIsAdmin] = useState(window.location.hash === '#admin');
   const [view, setView] = useState('login');
   const [student, setStudent] = useState({ id: '', name: '' });
   const [quizConfig, setQuizConfig] = useState({ type: 'hiragana', level: 'seion' });
   const [questions, setQuestions] = useState([]);
   const [finalScore, setFinalScore] = useState({ score: 0, total: 0 });
+
+  useEffect(() => {
+    function onHashChange() {
+      setIsAdmin(window.location.hash === '#admin');
+    }
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
 
   function handleLogin(id, name) {
     setStudent({ id, name });
@@ -287,6 +299,14 @@ export default function App() {
       score,
       total,
     });
+  }
+
+  if (isAdmin) {
+    return (
+      <div className="App">
+        <AdminScreen />
+      </div>
+    );
   }
 
   return (
