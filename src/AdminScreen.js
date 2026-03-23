@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 
 const PW_KEY = 'adminPwHash';
 const GAS_URL_KEY = 'gasUrl';
+const SHEET_URL_KEY = 'sheetUrl';
 
 async function hashPw(pw) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
@@ -115,6 +116,8 @@ function LoginScreen({ onLogin }) {
 function Dashboard() {
   const [gasUrl, setGasUrl] = useState(() => localStorage.getItem(GAS_URL_KEY) || '');
   const [gasInput, setGasInput] = useState(() => localStorage.getItem(GAS_URL_KEY) || '');
+  const [sheetUrl, setSheetUrl] = useState(() => localStorage.getItem(SHEET_URL_KEY) || '');
+  const [sheetInput, setSheetInput] = useState(() => localStorage.getItem(SHEET_URL_KEY) || '');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -124,6 +127,12 @@ function Dashboard() {
     const trimmed = gasInput.trim();
     localStorage.setItem(GAS_URL_KEY, trimmed);
     setGasUrl(trimmed);
+  }
+
+  function saveSheetUrl() {
+    const trimmed = sheetInput.trim();
+    localStorage.setItem(SHEET_URL_KEY, trimmed);
+    setSheetUrl(trimmed);
   }
 
   async function fetchResults(url) {
@@ -156,7 +165,20 @@ function Dashboard() {
 
   return (
     <div className="screen admin-screen">
-      <h1>결과 관리</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+        <h1 style={{ marginBottom: 0 }}>결과 관리</h1>
+        {sheetUrl && (
+          <a
+            href={sheetUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-small"
+            style={{ textDecoration: 'none', fontSize: '0.85rem' }}
+          >
+            구글 시트 열기
+          </a>
+        )}
+      </div>
 
       <div className="admin-section">
         <label>GAS 웹앱 URL</label>
@@ -168,6 +190,16 @@ function Dashboard() {
             onChange={e => setGasInput(e.target.value)}
           />
           <button className="btn btn-small" onClick={saveGasUrl}>저장</button>
+        </div>
+        <label style={{ marginTop: 12 }}>구글 시트 URL</label>
+        <div className="gas-url-row">
+          <input
+            type="text"
+            placeholder="https://docs.google.com/spreadsheets/d/.../edit"
+            value={sheetInput}
+            onChange={e => setSheetInput(e.target.value)}
+          />
+          <button className="btn btn-small" onClick={saveSheetUrl}>저장</button>
         </div>
         {gasUrl && (
           <button
