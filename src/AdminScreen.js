@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
 const PW_KEY = 'adminPwHash';
-const GAS_URL_KEY = 'gasUrl';
-const SHEET_URL_KEY = 'sheetUrl';
+const GAS_URL = process.env.REACT_APP_GAS_URL || '';
+const SHEET_URL = process.env.REACT_APP_SHEET_URL || '';
 
 async function hashPw(pw) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
@@ -114,34 +114,16 @@ function LoginScreen({ onLogin }) {
 
 // 관리자 대시보드
 function Dashboard() {
-  const defaultGasUrl = localStorage.getItem(GAS_URL_KEY) || process.env.REACT_APP_GAS_URL || '';
-  const [gasUrl, setGasUrl] = useState(defaultGasUrl);
-  const [gasInput, setGasInput] = useState(defaultGasUrl);
-  const [sheetUrl, setSheetUrl] = useState(() => localStorage.getItem(SHEET_URL_KEY) || '');
-  const [sheetInput, setSheetInput] = useState(() => localStorage.getItem(SHEET_URL_KEY) || '');
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [filter, setFilter] = useState('');
 
-  function saveGasUrl() {
-    const trimmed = gasInput.trim();
-    localStorage.setItem(GAS_URL_KEY, trimmed);
-    setGasUrl(trimmed);
-  }
-
-  function saveSheetUrl() {
-    const trimmed = sheetInput.trim();
-    localStorage.setItem(SHEET_URL_KEY, trimmed);
-    setSheetUrl(trimmed);
-  }
-
-  async function fetchResults(url) {
-    if (!url) { setError('GAS URL을 먼저 설정해주세요.'); return; }
+  async function fetchResults() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(url);
+      const res = await fetch(GAS_URL);
       const data = await res.json();
       if (data.error) throw new Error(data.error);
       setResults(data);
@@ -152,9 +134,7 @@ function Dashboard() {
     }
   }
 
-  useEffect(() => {
-    if (gasUrl) fetchResults(gasUrl);
-  }, [gasUrl]);
+  useEffect(() => { fetchResults(); }, []);
 
   const filtered = filter.trim()
     ? results.filter(r =>
@@ -166,52 +146,19 @@ function Dashboard() {
 
   return (
     <div className="screen admin-screen">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-        <h1 style={{ marginBottom: 0 }}>결과 관리</h1>
-        {sheetUrl && (
-          <a
-            href={sheetUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="btn btn-small"
-            style={{ textDecoration: 'none', fontSize: '0.85rem' }}
-          >
-            구글 시트 열기
-          </a>
-        )}
-      </div>
-
-      <div className="admin-section">
-        <label>GAS 웹앱 URL</label>
-        <div className="gas-url-row">
-          <input
-            type="text"
-            placeholder="https://script.google.com/macros/s/.../exec"
-            value={gasInput}
-            onChange={e => setGasInput(e.target.value)}
-          />
-          <button className="btn btn-small" onClick={saveGasUrl}>저장</button>
-        </div>
-        <label style={{ marginTop: 12 }}>구글 시트 URL</label>
-        <div className="gas-url-row">
-          <input
-            type="text"
-            placeholder="https://docs.google.com/spreadsheets/d/.../edit"
-            value={sheetInput}
-            onChange={e => setSheetInput(e.target.value)}
-          />
-          <button className="btn btn-small" onClick={saveSheetUrl}>저장</button>
-        </div>
-        {gasUrl && (
-          <button
-            className="btn"
-            style={{ marginTop: 8 }}
-            onClick={() => fetchResults(gasUrl)}
-            disabled={loading}
-          >
-            {loading ? '불러오는 중...' : '새로고침'}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+        <h1 style={{ marginBottom: 0 }}>퀴즈 결과</h1>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {SHEET_URL && (
+            <a href={SHEET_URL} target="_blank" rel="noreferrer"
+              className="btn btn-small" style={{ textDecoration: 'none', fontSize: '0.85rem' }}>
+              시트 열기
+            </a>
+          )}
+          <button className="btn btn-small" onClick={fetchResults} disabled={loading}>
+            {loading ? '...' : '새로고침'}
           </button>
-        )}
+        </div>
       </div>
 
       {error && <p className="error-msg">{error}</p>}
@@ -226,10 +173,7 @@ function Dashboard() {
               value={filter}
               onChange={e => setFilter(e.target.value)}
             />
-            <button
-              className="btn btn-small btn-green"
-              onClick={() => downloadCSV(filtered)}
-            >
+            <button className="btn btn-small btn-green" onClick={() => downloadCSV(filtered)}>
               CSV 다운로드
             </button>
           </div>
@@ -260,7 +204,7 @@ function Dashboard() {
         </div>
       )}
 
-      {!loading && results.length === 0 && gasUrl && !error && (
+      {!loading && results.length === 0 && !error && (
         <p style={{ textAlign: 'center', color: '#aaa', marginTop: 20 }}>저장된 결과가 없습니다.</p>
       )}
 
