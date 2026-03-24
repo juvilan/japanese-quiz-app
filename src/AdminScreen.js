@@ -114,8 +114,9 @@ function LoginScreen({ onLogin }) {
 
 // 관리자 대시보드
 function Dashboard() {
-  const [gasUrl, setGasUrl] = useState(() => localStorage.getItem(GAS_URL_KEY) || '');
-  const [gasInput, setGasInput] = useState(() => localStorage.getItem(GAS_URL_KEY) || '');
+  const defaultGasUrl = localStorage.getItem(GAS_URL_KEY) || process.env.REACT_APP_GAS_URL || '';
+  const [gasUrl, setGasUrl] = useState(defaultGasUrl);
+  const [gasInput, setGasInput] = useState(defaultGasUrl);
   const [sheetUrl, setSheetUrl] = useState(() => localStorage.getItem(SHEET_URL_KEY) || '');
   const [sheetInput, setSheetInput] = useState(() => localStorage.getItem(SHEET_URL_KEY) || '');
   const [results, setResults] = useState([]);
