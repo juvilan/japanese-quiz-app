@@ -3,7 +3,7 @@ import './App.css';
 import AdminScreen from './AdminScreen';
 
 function getGasUrl() {
-  return localStorage.getItem('gasUrl') || '';
+  return localStorage.getItem('gasUrl') || process.env.REACT_APP_GAS_URL || '';
 }
 
 // ===== 가나 데이터 =====
